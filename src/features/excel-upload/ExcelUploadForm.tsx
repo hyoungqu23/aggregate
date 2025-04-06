@@ -120,20 +120,29 @@ export const ExcelUploadForm = ({
     fileInputRef.current?.click();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleDropZoneClick();
+    }
+  };
+
   return (
-    <Card className="w-full max-w-2xl mx-auto bg-card border-border">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-card-foreground">엑셀 파일 업로드</CardTitle>
+    <Card className="w-full bg-card border-border shadow-lg">
+      <CardHeader className="pb-4 space-y-2">
+        <CardTitle className="text-xl text-card-foreground">
+          엑셀 파일 업로드
+        </CardTitle>
         <CardDescription className="text-muted-foreground">
           변환하려는 Excel 파일을 업로드해주세요.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} {...props}>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div
               className={cls(
-                "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
+                "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
                 "hover:border-primary/50 hover:bg-muted/30",
                 isDragging ? "border-primary bg-muted/30" : "border-border",
                 errors.files ? "border-destructive" : ""
@@ -142,27 +151,17 @@ export const ExcelUploadForm = ({
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
+              onClick={handleDropZoneClick}
+              onKeyDown={handleKeyDown}
               aria-label="파일 업로드 영역. 클릭하거나 파일을 드래그하세요."
             >
-              <UploadCloud className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm font-medium mb-1 text-card-foreground">
-                파일을 여기에 드래그하거나 선택하세요
+              <UploadCloud className="w-12 h-12 mx-auto mb-4 text-primary/60" />
+              <p className="text-sm font-medium mb-2 text-card-foreground">
+                파일을 여기에 드래그하거나 클릭하세요
               </p>
-              <p className="text-xs text-muted-foreground mb-4">
-                또는 아래 버튼을 클릭하여 파일을 선택하세요
-              </p>
-              <p className="text-xs text-muted-foreground mb-4">
+              <p className="text-xs text-muted-foreground mb-6">
                 * XLSX 확장자만 지원됩니다
               </p>
-              <Button
-                type="button"
-                onClick={handleDropZoneClick}
-                variant="outline"
-                size="sm"
-                className="mx-auto"
-              >
-                파일 선택하기
-              </Button>
               <Input
                 type="file"
                 accept=".xlsx"
@@ -174,15 +173,18 @@ export const ExcelUploadForm = ({
             </div>
 
             {selectedFiles.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-card-foreground">
-                  선택된 파일 ({selectedFiles.length})
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-card-foreground flex items-center">
+                  <span>선택된 파일</span>
+                  <span className="ml-2 px-2 py-0.5 bg-muted text-xs rounded-full">
+                    {selectedFiles.length}
+                  </span>
                 </p>
-                <div className="max-h-60 overflow-auto">
+                <div className="max-h-60 overflow-auto rounded-md border border-border p-1">
                   {selectedFiles.map((file, index) => (
                     <div
                       key={`${file.name}-${index}`}
-                      className="flex items-center justify-between bg-muted/30 rounded p-2 mb-2"
+                      className="flex items-center justify-between bg-muted/20 rounded-sm p-2 mb-1.5 hover:bg-muted/30 transition-colors"
                     >
                       <span className="text-sm truncate max-w-[80%] text-card-foreground">
                         {file.name}
@@ -193,9 +195,9 @@ export const ExcelUploadForm = ({
                         size="icon"
                         onClick={() => handleRemoveFile(index)}
                         disabled={isLoading}
-                        className="text-muted-foreground hover:text-destructive hover:bg-transparent"
+                        className="text-muted-foreground hover:text-destructive hover:bg-transparent h-6 w-6"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   ))}
@@ -205,10 +207,10 @@ export const ExcelUploadForm = ({
           </div>
         </form>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="pt-2 pb-6">
         <Button
           type="button"
-          className="w-full"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={onSubmit}
           disabled={isLoading || selectedFiles.length === 0}
         >

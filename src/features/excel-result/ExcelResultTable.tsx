@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ExcelData } from "@/entities/excel/types";
+import type { ExcelData } from "@/entities/excel/types";
 import { exportToExcel } from "@/entities/excel/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,7 +121,11 @@ export const ExcelResultTable = ({ data }: ExcelResultTableProps) => {
       },
       cell: ({ row }) => {
         const quantity = row.getValue("quantity") as number;
-        return <div className="text-right">{quantity.toLocaleString()}</div>;
+        return (
+          <div className="text-right font-medium">
+            {quantity.toLocaleString()}
+          </div>
+        );
       },
     },
     {
@@ -144,7 +148,11 @@ export const ExcelResultTable = ({ data }: ExcelResultTableProps) => {
       },
       cell: ({ row }) => {
         const sales = row.getValue("sales") as number;
-        return <div className="text-right">{sales.toLocaleString()}원</div>;
+        return (
+          <div className="text-right font-medium">
+            {sales.toLocaleString()}원
+          </div>
+        );
       },
     },
   ];
@@ -171,16 +179,20 @@ export const ExcelResultTable = ({ data }: ExcelResultTableProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 bg-card p-6 rounded-lg shadow-lg">
+      <div className="flex justify-between items-center pb-4 border-b border-border">
         <h2 className="text-xl font-bold text-foreground">변환 결과</h2>
-        <Button onClick={handleDownload} className="flex items-center gap-2">
+        <Button
+          onClick={handleDownload}
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+          size="sm"
+        >
           <Download className="h-4 w-4" />
           <span>엑셀 다운로드</span>
         </Button>
       </div>
 
-      <div className="rounded-md border border-border bg-card">
+      <div className="rounded-md border border-border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -189,7 +201,10 @@ export const ExcelResultTable = ({ data }: ExcelResultTableProps) => {
                 className="border-border hover:bg-muted"
               >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-foreground">
+                  <TableHead
+                    key={header.id}
+                    className="text-foreground py-4 bg-muted/30"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -207,10 +222,10 @@ export const ExcelResultTable = ({ data }: ExcelResultTableProps) => {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-border hover:bg-muted"
+                  className="border-border hover:bg-muted/20"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-foreground">
+                    <TableCell key={cell.id} className="text-foreground py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -233,33 +248,35 @@ export const ExcelResultTable = ({ data }: ExcelResultTableProps) => {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between py-4 border-t border-border">
         <div className="flex-1 text-sm text-muted-foreground">
           총 {table.getFilteredRowModel().rows.length}개의 항목
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="text-foreground border-border"
-          >
-            이전
-          </Button>
+        <div className="flex items-center space-x-6">
           <div className="text-sm font-medium">
             {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}{" "}
             페이지
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="text-foreground border-border"
-          >
-            다음
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="text-foreground border-border h-8 px-3"
+            >
+              이전
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="text-foreground border-border h-8 px-3"
+            >
+              다음
+            </Button>
+          </div>
         </div>
       </div>
     </div>
