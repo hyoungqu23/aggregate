@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as XLSX from "xlsx";
 import { parseFileName, parseExcelFile, aggregateExcelData } from "../utils";
-import type { ExcelError, FileData } from "../types";
+import type { FileData } from "../types";
 
 vi.mock("xlsx", () => ({
   read: vi.fn(),
