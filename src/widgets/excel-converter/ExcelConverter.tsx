@@ -4,7 +4,11 @@ import { useState } from "react";
 import { ExcelUploadForm } from "@/features/excel-upload/ExcelUploadForm";
 import { ExcelProgressDialog } from "@/features/excel-progress/ExcelProgressDialog";
 import { ExcelResultTable } from "@/features/excel-result/ExcelResultTable";
-import { ExcelData, ExcelError, FileData } from "@/entities/excel/types";
+import {
+  type ExcelData,
+  ExcelError,
+  type FileData,
+} from "@/entities/excel/types";
 import { aggregateExcelData, parseExcelFile } from "@/entities/excel/utils";
 import { toast } from "sonner";
 
@@ -15,7 +19,6 @@ export const ExcelConverter = () => {
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
   const [resultData, setResultData] = useState<ExcelData[]>([]);
-  const [showResult, setShowResult] = useState(false);
 
   const handleFilesUploaded = async (files: File[]) => {
     if (files.length === 0) return;
@@ -24,7 +27,7 @@ export const ExcelConverter = () => {
     setProgress(0);
     setCurrentFileIndex(0);
     setTotalFiles(files.length);
-    setShowResult(false);
+    setResultData([]);
 
     try {
       const parsedFiles: FileData[] = [];
@@ -32,7 +35,7 @@ export const ExcelConverter = () => {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         setCurrentFileName(file.name);
-        setCurrentFileIndex(i);
+        setCurrentFileIndex(i + 1);
 
         // 각 파일마다 진행률 계산 (0-90%, 남은 10%는 집계 처리용)
         const fileStartProgress = (i / files.length) * 90;
@@ -42,8 +45,12 @@ export const ExcelConverter = () => {
         setProgress(fileStartProgress);
 
         try {
-          const fileData = await parseExcelFile(file);
-          parsedFiles.push(fileData);
+          console.log(`파일 파싱 시작: ${file.name}`);
+          const result = await parseExcelFile(file);
+          console.log(
+            `파일 파싱 완료: ${file.name}, 데이터 행 수: ${result.data.length}`
+          );
+          parsedFiles.push(result);
 
           // 파일 처리 완료 진행률 표시
           setProgress(fileEndProgress);
@@ -62,10 +69,12 @@ export const ExcelConverter = () => {
 
       // 데이터가 파싱된 파일이 하나라도 있으면 처리 진행
       if (parsedFiles.length > 0) {
+        console.log(`집계 처리 시작: ${parsedFiles.length}개 파일`);
         const aggregatedData = aggregateExcelData(parsedFiles);
+        console.log(`집계 처리 완료: ${aggregatedData.length}개 항목 생성`);
+
         setResultData(aggregatedData);
-        setShowResult(true);
-        toast.success("데이터 변환이 완료되었습니다.");
+        toast.success(`${aggregatedData.length}개 항목 변환이 완료되었습니다.`);
       } else {
         toast.error("처리할 수 있는 데이터가 없습니다.");
       }
@@ -84,13 +93,17 @@ export const ExcelConverter = () => {
   };
 
   return (
-    <div className="container py-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center">엑셀 변환기</h1>
+    <div className="flex flex-col items-center py-10 px-4 gap-10 bg-background min-h-screen">
+      <h1 className="text-3xl font-bold text-center text-foreground">
+        엑셀 변환기
+      </h1>
 
-      <ExcelUploadForm
-        onFilesUploaded={handleFilesUploaded}
-        isLoading={isLoading}
-      />
+      <div className="w-full max-w-[480px]">
+        <ExcelUploadForm
+          onFilesUploaded={handleFilesUploaded}
+          isLoading={isLoading}
+        />
+      </div>
 
       <ExcelProgressDialog
         isOpen={isLoading}
@@ -100,8 +113,8 @@ export const ExcelConverter = () => {
         currentFileIndex={currentFileIndex}
       />
 
-      {showResult && resultData.length > 0 && (
-        <div className="mt-10">
+      {resultData.length > 0 && (
+        <div className="w-full max-w-[1024px]">
           <ExcelResultTable data={resultData} />
         </div>
       )}
